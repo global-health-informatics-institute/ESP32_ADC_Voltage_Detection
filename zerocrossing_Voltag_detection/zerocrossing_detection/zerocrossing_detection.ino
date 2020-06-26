@@ -5,16 +5,16 @@ MCP3002 adc;
 int LED_BUILTIN=2;
 gpio_num_t zero_cross = GPIO_NUM_35; // THIS IS FOR THE ZERO CROSSING DETECTION AS PER PCB LAYOUT  *** CHANGED TO GPIO25 to match PCB ***
 bool zero_cross_detected = false;
-int Voltage = 0;
+float Voltage = 0.0;
 
 /* create a hardware timer */
-hw_timer_t*timer = NULL;
+hw_timer_t *timer = NULL;
 
 /* LED state */
 volatile byte state = LOW;
 
 void IRAM_ATTR onTimer(){
-  Voltage = (adc.analogRead(0)) / 1024.0*407*0.7071;
+  Voltage = adc.analogRead(0) / 1024.0*407*0.7071;
 }
 
 //Zero Crossing Interrupt Function
@@ -50,15 +50,29 @@ void setup()
     adc.begin(2,23,19,18);
 }
 
+
+// get maximum reading value
+int get_max() {
+  int Vmax = 0;
+  int ADC_VALUE = 0; 
+  
+  Vmax = 0;
+  for(int i = 0; i < 200; i++) {
+     ADC_VALUE = adc.analogRead(0);  // read from adc channel 0
+    if(ADC_VALUE > Vmax) Vmax = ADC_VALUE;
+  }  
+  return Vmax;
+}
+
 void loop() 
 {   
   
   //If the zero cross interruption was detected we create the 100us firing pulse  
   if (zero_cross_detected){
     zero_cross_detected = false;
-    Serial.println(Voltage);
-  }
+   Serial.println(String(Voltage));
+   }
 
-  
+   delay(1000);
 }
 //End of void loop
