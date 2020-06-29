@@ -23,6 +23,9 @@ void IRAM_ATTR zero_crossing()
  delayMicroseconds(10);
  if (gpio_get_level(zero_cross))
     zero_cross_detected = true;
+
+    /* Start an alarm */
+    timerAlarmEnable(timer);
      /* Attach onTimer function to our timer */
     timerAttachInterrupt(timer, &onTimer, true);
 }
@@ -40,9 +43,6 @@ void setup()
     => 1 second is 1000000us */
     /* Repeat the alarm (third parameter) */
     timerAlarmWrite(timer, 5000, true);
-  
-    /* Start an alarm */
-    timerAlarmEnable(timer);
     
     attachInterrupt(digitalPinToInterrupt(zero_cross), zero_crossing, RISING);
     
@@ -72,7 +72,6 @@ void loop()
     zero_cross_detected = false;
    Serial.println(String(Voltage));
    }
-
    delay(1000);
 }
 //End of void loop
