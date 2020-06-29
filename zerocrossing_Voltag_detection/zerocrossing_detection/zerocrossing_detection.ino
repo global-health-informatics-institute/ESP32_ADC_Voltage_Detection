@@ -15,24 +15,31 @@ volatile byte state = LOW;
 
 void IRAM_ATTR onTimer(){
   Voltage = adc.analogRead(0) / 1024.0*407*0.7071;
+  get_max();
 }
 
 //Zero Crossing Interrupt Function
 void IRAM_ATTR zero_crossing()
 {
  delayMicroseconds(10);
- if (gpio_get_level(zero_cross))
-    zero_cross_detected = true;
-
-    /* Start an alarm */
-    timerAlarmEnable(timer);
-     /* Attach onTimer function to our timer */
-    timerAttachInterrupt(timer, &onTimer, true);
+ if (gpio_get_level(zero_cross)) {
+  
+  zero_cross_detected = true;
+  
+  /* Start an alarm */
+  timerAlarmEnable(timer);
+  
+  /* Attach onTimer function to our timer */
+  timerAttachInterrupt(timer, &onTimer, true);
+  
+  
+ }
+    
 }
 
 void setup() 
 {
-  Serial.begin(115200);
+  Serial.begin(9600);
   pinMode (zero_cross, INPUT); 
   pinMode(LED_BUILTIN, OUTPUT);
   /* Use 1st timer of 4 */
@@ -42,7 +49,7 @@ void setup()
   /* Set alarm to call onTimer function every second 1 tick is 1us
     => 1 second is 1000000us */
     /* Repeat the alarm (third parameter) */
-    timerAlarmWrite(timer, 5000, true);
+    timerAlarmWrite(timer, 4900, false);
     
     attachInterrupt(digitalPinToInterrupt(zero_cross), zero_crossing, RISING);
     
@@ -61,6 +68,7 @@ int get_max() {
      ADC_VALUE = adc.analogRead(0);  // read from adc channel 0
     if(ADC_VALUE > Vmax) Vmax = ADC_VALUE;
   }  
+  delayMicroseconds(100);
   return Vmax;
 }
 
@@ -70,7 +78,7 @@ void loop()
   //If the zero cross interruption was detected we create the 100us firing pulse  
   if (zero_cross_detected){
     zero_cross_detected = false;
-   Serial.println(String(Voltage));
+   Serial.println("Voltage: " + String(Voltage));    
    }
    delay(1000);
 }
