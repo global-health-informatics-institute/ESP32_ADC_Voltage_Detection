@@ -36,8 +36,10 @@ void IRAM_ATTR onTimer(){
 //}
 
 void IRAM_ATTR zero_crossing() {
-  if ((millis() - Last_Zero_Crossing_Time ) < 2) // the last interrupt was HIGH to LOW transition since within 2mS
+  if ((millis() - Last_Zero_Crossing_Time ) < 2) { // the last interrupt was HIGH to LOW transition since within 2mS
+    zero_cross_detected = false;
     timerAlarmEnable(timer);/* Start an alarm */
+  }
   Last_Zero_Crossing_Time = millis();
 }
 
@@ -88,13 +90,15 @@ void loop()
   //If the zero cross interruption was detected we create the 100us firing pulse  
   if (zero_cross_detected){
     zero_cross_detected = false;
+
+    Serial.println("Timer: " + String(Last_Zero_Crossing_Time));
+    digitalWrite(ELEMENT_firing_pin,HIGH);
+    delayMicroseconds(100);
+    digitalWrite(ELEMENT_firing_pin,LOW);
   }
   
    Serial.println("Voltage: " + String(Voltage));    
-   Serial.println("Timer: " + String(Last_Zero_Crossing_Time));
-   digitalWrite(ELEMENT_firing_pin,HIGH);
-   delayMicroseconds(100);
-   digitalWrite(ELEMENT_firing_pin,LOW);
+   
    //delay(1000);
 }
 //End of void loop
