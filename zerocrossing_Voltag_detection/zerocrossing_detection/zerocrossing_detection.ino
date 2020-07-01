@@ -7,7 +7,7 @@ gpio_num_t zero_cross = GPIO_NUM_35; // THIS IS FOR THE ZERO CROSSING DETECTION 
 gpio_num_t ELEMENT_firing_pin = GPIO_NUM_33;
 bool zero_cross_detected = false;
 float Voltage = 1.2;
-float Last_Zero_Crossing_Time = 0.0;
+unsigned long Last_Zero_Crossing_Time = 0;
 hw_timer_t *timer = NULL;/* create a hardware timer */
 volatile byte state = LOW;/* LED state */
 
@@ -22,6 +22,7 @@ void IRAM_ATTR zero_crossing() {
   }  
     Last_Zero_Crossing_Time = millis();  
 }
+
 void setup() 
 {
   Serial.begin(9600);
@@ -44,9 +45,9 @@ void loop()
   if (zero_cross_detected){
     zero_cross_detected = false;
     digitalWrite(ELEMENT_firing_pin,HIGH);
-    delayMicroseconds(300);
+    delayMicroseconds(100);
     digitalWrite(ELEMENT_firing_pin,LOW);
   }  
-   //Serial.println("Voltage: " + String(Voltage));    
+   //Serial.println("Voltage: " + String(Voltage));
 }
 //End of void loop
