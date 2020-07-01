@@ -25,7 +25,7 @@ void IRAM_ATTR zero_crossing() {
 
 void setup() 
 {
-  Serial.begin(9600);
+  Serial.begin(115200);
   pinMode (zero_cross, INPUT); 
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(ELEMENT_firing_pin, OUTPUT);  
@@ -35,7 +35,7 @@ void setup()
   timer = timerBegin(0, 80, true);
     timerAttachInterrupt(timer, &onTimer, true); /* Attach onTimer function to our timer */
   /* Set alarm to call onTimer function every second 1 tick is 1us => 1 second is 1000000us */
-    timerAlarmWrite(timer, 5000, false);/* Repeat the alarm (third parameter) */
+    timerAlarmWrite(timer, 5200, false);/* Repeat the alarm (third parameter) */
     attachInterrupt(digitalPinToInterrupt(zero_cross), zero_crossing, RISING);
 }
 
@@ -48,6 +48,6 @@ void loop()
     delayMicroseconds(100);
     digitalWrite(ELEMENT_firing_pin,LOW);
   }  
-   //Serial.println("Voltage: " + String(Voltage));
+   Serial.println(Voltage);
 }
 //End of void loop
