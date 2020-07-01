@@ -10,7 +10,7 @@ bool print_voltage_status = false;
 float Voltage = 0;
 unsigned long previousMillis = 0; 
 unsigned long currentMillis = 0;
-int voltage_read_Delay = 5;
+int voltage_read_Delay = 5200;
 unsigned long Last_Zero_Crossing_Time = 0;
 hw_timer_t *timer = NULL;/* create a hardware timer */
 volatile byte state = LOW;/* LED state */
@@ -52,14 +52,14 @@ void loop()
     digitalWrite(firing_pin,LOW);
   }
 
-  if (print_voltage_status) {
-    Serial.println(Voltage);
-    print_voltage_status = false;
-    }
+//  if (print_voltage_status) {
+//    Serial.println(Voltage);
+//    print_voltage_status = false;
+//    }
 
-//  if(currentMillis - previousMillis >= voltage_read_Delay){
-//    previousMillis += voltage_read_Delay;
-//    Serial.println(adc.analogRead(0) / 1024.0*407*0.7071);    
-//  }
+  if(currentMillis - previousMillis >= voltage_read_Delay){
+    previousMillis += micros();
+    Serial.println(adc.analogRead(0) / 1024.0*407*0.7071);    
+  }
 }
 //End of void loop
