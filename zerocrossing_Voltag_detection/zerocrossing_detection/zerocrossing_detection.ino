@@ -40,22 +40,24 @@ void setup()
   timerAttachInterrupt(timer, &onTimer, true); /* Attach onTimer function to our timer */
   /* Set alarm to call onTimer function every second 1 tick is 1us => 1 second is 1000000us
   timerAlarmWrite(timer, 5200, false);/* Repeat the alarm (third parameter) */
+  pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(firing_pin, OUTPUT); 
   attachInterrupt(digitalPinToInterrupt(zero_cross), zero_crossing, RISING);
 }
 void loop() 
 {    
-  Serial.println(Voltage_read);
+  //Serial.println(Voltage_read);
   currentMicros = micros();  
   //If the zero cross interruption was detected we create the 100us firing pulse  
   if (zero_cross_detected){
-    Voltage_read = false; 
+    Voltage_read = false;
     zero_cross_detected = false; 
     digitalWrite(firing_pin,HIGH);
     delayMicroseconds(100);
     digitalWrite(firing_pin,LOW);
   }
 
-  if ((currentMicros - Last_Zero_Crossing_Time >= voltage_read_Delay) && (!Voltage_read)) {
+  if (((currentMicros - Last_Zero_Crossing_Time) >= voltage_read_Delay) && (!Voltage_read)) {
     Voltage_read = true;
     volts = adc.analogRead(0) / 1024.0*407*0.7071;    
     if (volts > 20) {
