@@ -7,10 +7,12 @@ gpio_num_t zero_cross = GPIO_NUM_35; // THIS IS FOR THE ZERO CROSSING DETECTION 
 gpio_num_t firing_pin = GPIO_NUM_33;
 bool zero_cross_detected = false;
 bool print_voltage_status = false;
+bool Voltage_read = false;
 float Voltage = 0;
 unsigned long previousMicros = 0; 
 unsigned long currentMicros = 0;
 int voltage_read_Delay = 5200;
+float volts = 0;
 unsigned long Last_Zero_Crossing_Time = 0;
 hw_timer_t *timer = NULL;/* create a hardware timer */
 volatile byte state = LOW;/* LED state */
@@ -40,25 +42,21 @@ void setup()
   timerAlarmWrite(timer, 5200, false);/* Repeat the alarm (third parameter) */
   attachInterrupt(digitalPinToInterrupt(zero_cross), zero_crossing, RISING);
 }
-
 void loop() 
 {    
-  float volts = 0;
+  Serial.println(Voltage_read);
   currentMicros = micros();  
   //If the zero cross interruption was detected we create the 100us firing pulse  
   if (zero_cross_detected){
-    zero_cross_detected = false;    
+    Voltage_read = false; 
+    zero_cross_detected = false; 
     digitalWrite(firing_pin,HIGH);
     delayMicroseconds(100);
     digitalWrite(firing_pin,LOW);
   }
 
-//  if (print_voltage_status) {
-//    Serial.println(Voltage);
-//    print_voltage_status = false;
-//    }
-
-  if(currentMicros - Last_Zero_Crossing_Time >= voltage_read_Delay) {
+  if ((currentMicros - Last_Zero_Crossing_Time >= voltage_read_Delay) && (!Voltage_read)) {
+    Voltage_read = true;
     volts = adc.analogRead(0) / 1024.0*407*0.7071;    
     if (volts > 20) {
       Serial.println(volts);
