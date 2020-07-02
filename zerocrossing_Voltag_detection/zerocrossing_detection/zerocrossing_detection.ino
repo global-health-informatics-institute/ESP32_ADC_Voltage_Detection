@@ -8,24 +8,24 @@ gpio_num_t firing_pin = GPIO_NUM_33;
 bool zero_cross_detected = false;
 bool print_voltage_status = false;
 float Voltage = 0;
-unsigned long previousMillis = 0; 
-unsigned long currentMillis = 0;
+unsigned long previousMicros = 0; 
+unsigned long currentMicros = 0;
 int voltage_read_Delay = 5200;
 unsigned long Last_Zero_Crossing_Time = 0;
 hw_timer_t *timer = NULL;/* create a hardware timer */
 volatile byte state = LOW;/* LED state */
 
-void IRAM_ATTR onTimer(){
+/*void IRAM_ATTR onTimer(){
   Voltage = adc.analogRead(0) / 1024.0*407*0.7071;
   print_voltage_status = true;
-}
+}*/
 
 void IRAM_ATTR zero_crossing() {
-  if ((millis() - Last_Zero_Crossing_Time ) < 2) { // the last interrupt was HIGH to LOW transition since within 2mS
+  if ((micros() - Last_Zero_Crossing_Time ) < 2000) { // the last interrupt was HIGH to LOW transition since within 2mS
     zero_cross_detected = true;
-    timerAlarmEnable(timer);/* Start an alarm */
+    //timerAlarmEnable(timer);/* Start an alarm */
   }  
-    Last_Zero_Crossing_Time = millis();  
+    Last_Zero_Crossing_Time = micros();
 }
 
 void setup() 
@@ -33,17 +33,18 @@ void setup()
   Serial.begin(115200);  
   adc.begin(2,23,19,18);// Use the defined pins for SPI hardware interface.
   /* Use 1st timer of 4 */
-  /* 1 tick take 1/(80MHZ/80) = 1us so we set divider 80 and count up */
+  /* 1 tick take 1/(80MHZ/80) = 1us so we set divider 80 and count up 
   timer = timerBegin(0, 80, true);
   timerAttachInterrupt(timer, &onTimer, true); /* Attach onTimer function to our timer */
-  /* Set alarm to call onTimer function every second 1 tick is 1us => 1 second is 1000000us */
+  /* Set alarm to call onTimer function every second 1 tick is 1us => 1 second is 1000000us
   timerAlarmWrite(timer, 5200, false);/* Repeat the alarm (third parameter) */
   attachInterrupt(digitalPinToInterrupt(zero_cross), zero_crossing, RISING);
 }
 
 void loop() 
 {    
-  currentMillis = millis();  
+  float volts = 0;
+  currentMicros = micros();  
   //If the zero cross interruption was detected we create the 100us firing pulse  
   if (zero_cross_detected){
     zero_cross_detected = false;    
@@ -57,9 +58,11 @@ void loop()
 //    print_voltage_status = false;
 //    }
 
-  if(currentMillis - previousMillis >= voltage_read_Delay){
-    previousMillis += micros();
-    Serial.println(adc.analogRead(0) / 1024.0*407*0.7071);    
+  if(currentMicros - Last_Zero_Crossing_Time >= voltage_read_Delay) {
+    volts = adc.analogRead(0) / 1024.0*407*0.7071;    
+    if (volts > 20) {
+      Serial.println(volts);
+    }
   }
 }
 //End of void loop
