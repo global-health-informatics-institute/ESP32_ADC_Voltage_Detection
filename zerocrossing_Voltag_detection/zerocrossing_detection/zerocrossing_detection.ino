@@ -42,6 +42,7 @@ void setup()
   timerAlarmWrite(timer, 5200, false);/* Repeat the alarm (third parameter) */
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(firing_pin, OUTPUT); 
+  pinMode (zero_cross, INPUT); 
   attachInterrupt(digitalPinToInterrupt(zero_cross), zero_crossing, RISING);
 }
 void loop() 
