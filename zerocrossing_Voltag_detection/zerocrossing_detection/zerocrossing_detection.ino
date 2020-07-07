@@ -11,6 +11,7 @@ unsigned long previousMicros = 0;
 unsigned long currentMicros = 0;
 int voltage_read_Delay = 4800;
 float volts = 0;
+int voltage_read_difference=0;
 unsigned long Last_Zero_Crossing_Time = 0;
 
 //Zero Crossing Interrupt Function
@@ -25,7 +26,6 @@ void IRAM_ATTR zero_crossing()
 //void IRAM_ATTR zero_crossing() {
 //  if ((micros() - Last_Zero_Crossing_Time ) > 2000) { // the last interrupt was HIGH to LOW transition since within 2mS
 //    zero_cross_detected = true;
-//    //timerAlarmEnable(timer);/* Start an alarm */
 //  }  
 //    Last_Zero_Crossing_Time = micros();
 //}
@@ -53,9 +53,15 @@ void loop()
   if (((currentMicros - Last_Zero_Crossing_Time) >= voltage_read_Delay) && (!Voltage_read)) {
     Voltage_read = true;
     volts = adc.analogRead(0) / 1024.0*407*0.7071;    
-    if (volts > 20) {
-      Serial.println(volts);
-    }
+    voltage_read_difference= currentMicros - Last_Zero_Crossing_Time;
+    Serial.print(volts);
+    Serial.print("," + String(currentMicros));
+    Serial.print("," + String(Last_Zero_Crossing_Time));
+    Serial.print("," + String(voltage_read_difference));
+    Serial.println(" ");
+//    if (volts > 20) {
+//      Serial.println(volts);
+//    }
   }
 }
 //End of void loop
