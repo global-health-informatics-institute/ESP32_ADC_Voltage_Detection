@@ -18,9 +18,10 @@ unsigned long Last_Zero_Crossing_Time = 0;
 void IRAM_ATTR zero_crossing()
 {
  delayMicroseconds(10);
- if (gpio_get_level(zero_cross))
-    zero_cross_detected = true;
- Last_Zero_Crossing_Time = micros(); 
+ if (gpio_get_level(zero_cross)){ 
+  zero_cross_detected = true; 
+  Last_Zero_Crossing_Time = micros(); 
+ }
 }
 
 //void IRAM_ATTR zero_crossing() {
@@ -41,18 +42,10 @@ void setup()
 void loop() 
 {    
   currentMicros = micros(); 
-  //If the zero cross interruption was detected we create the 100us firing pulse  
-  if (zero_cross_detected){
-    Voltage_read = false;
-    zero_cross_detected = false; 
-    digitalWrite(firing_pin,HIGH);
-    delayMicroseconds(100);
-    digitalWrite(firing_pin,LOW);
-  }
 
   if (((currentMicros - Last_Zero_Crossing_Time) >= voltage_read_Delay) && (!Voltage_read)) {
     Voltage_read = true;
-    volts = adc.analogRead(0) / 1024.0*407*0.7071;    
+    volts = adc.analogRead(0) / 1024.0*404*0.7071;    
     voltage_read_difference= currentMicros - Last_Zero_Crossing_Time;
     Serial.print(volts);
     Serial.print("," + String(currentMicros));
@@ -62,6 +55,15 @@ void loop()
 //    if (volts > 20) {
 //      Serial.println(volts);
 //    }
+  }
+
+  //If the zero cross interruption was detected we create the 100us firing pulse  
+  if (zero_cross_detected){
+    Voltage_read = false;
+    zero_cross_detected = false; 
+    digitalWrite(firing_pin,HIGH);
+    delayMicroseconds(100);
+    digitalWrite(firing_pin,LOW);
   }
 }
 //End of void loop
