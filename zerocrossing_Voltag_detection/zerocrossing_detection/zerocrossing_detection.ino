@@ -13,6 +13,8 @@ int voltage_read_Delay = 4800;
 float volts = 0;
 int voltage_read_difference=0;
 unsigned long Last_Zero_Crossing_Time = 0;
+float LastTenVolts[] = {0,0,0,0,0,0,0,0,0,0}; // An Array for the values
+int VoltsArrayIndex = 0;
 
 //Zero Crossing Interrupt Function
 void IRAM_ATTR zero_crossing()
@@ -31,6 +33,23 @@ void IRAM_ATTR zero_crossing()
 //    Last_Zero_Crossing_Time = micros();
 //}
 
+//This Is New
+double VoltsArrayAverage() {
+  double S=0;
+  int Values = 0;
+  for (int i=0; i<10; i++) {
+    if (LastTenVolts[i] != 0 ){
+      S = S+LastTenVolts[i];
+      Values++;
+    }   
+  }
+  if (Values > 0)
+    return S/Values;
+  else
+   return 0;
+}
+
+
 void setup() 
 {
   Serial.begin(115200);  
@@ -45,7 +64,9 @@ void loop()
 
   if (((currentMicros - Last_Zero_Crossing_Time) >= voltage_read_Delay) && (!Voltage_read)) {
     Voltage_read = true;
-    volts = adc.analogRead(0) / 1024.0*404*0.7071;    
+    LastTenVolts[VoltsArrayIndex] = adc.analogRead(0) / 1024.0*404*0.7071; 
+    volts = VoltsArrayAverage();
+    VoltsArrayIndex = (VoltsArrayIndex + 1) % 10;   
     voltage_read_difference= currentMicros - Last_Zero_Crossing_Time;
     Serial.print(volts);
     Serial.print("," + String(currentMicros));
